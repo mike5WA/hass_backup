@@ -1,0 +1,21 @@
+######################################################################
+#  MQTT Configurations
+#  ESPHome device.yaml references the state_topic to action
+#####################################################################
+
+sensor:
+  - name: "Connected"
+    state_topic: bellSetup
+    qos: 1
+
+  - name: "DoorBell-1"
+    state_topic: DB1/playTune
+    qos: 1
+
+  - name: "DoorBell-2"
+    state_topic: DB2/playTune
+    qos: 1
+
+  - name: "tunePlayed"
+    state_topic: tunePlayed
+    qos: 1

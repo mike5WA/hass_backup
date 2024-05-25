@@ -1,0 +1,28 @@
+# Loads default set of integrations. Do not remove.
+default_config:
+
+# Load frontend themes from the themes folder
+frontend:
+  themes: !include_dir_merge_named themes
+
+# Text to speech
+tts:
+  - platform: google_translate
+
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+mqtt: !include mqtt.yaml
+
+browser_mod:
+  prefix: browser_mod_
+
+sensor:
+  - platform: template
+    sensors:
+      nightstate:
+        friendly_name: Night State
+        value_template: "{% if is_state('sun.sun', 'below_horizon') %}1{% else %}0{% endif %}"
+
+# Example configuration.yaml entry
+media_source:

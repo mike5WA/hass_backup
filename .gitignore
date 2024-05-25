@@ -1,0 +1,19 @@
+!.yaml
+!.gitignore
+!.md
+!.sh
+!js !node-red/ !node-red/ !node-red/ !node-red/ !node-red
+!node-red/
+notebooks/
+esphome/
+custom_components/
+zigbee2mqtt/log/
+secrets.yaml
+.ssh
+.storage
+.cloud
+.google.token
+home-assistant.log.log*.txt
+log*.txt
+id_rsa*
+

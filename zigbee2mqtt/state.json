@@ -1,0 +1,18 @@
+{
+    "0x00124b002444ce95": {
+        "voltage": 3000,
+        "battery": 100,
+        "linkquality": 232,
+        "occupancy": true,
+        "tamper": false,
+        "battery_low": false
+    },
+    "0x94deb8fffeee9a39": {
+        "running": false,
+        "position": 100,
+        "state": "OPEN",
+        "linkquality": 255,
+        "motor_fault": false,
+        "battery": 100
+    }
+}

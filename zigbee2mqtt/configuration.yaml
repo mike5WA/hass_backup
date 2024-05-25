@@ -1,0 +1,17 @@
+homeassistant: true
+mqtt:
+  server: mqtt://core-mosquitto:1883
+  user: addons
+  password: ama8ieneiKie0tama9UaZauReichei4hoocoo6laovie9daigiefeiS1ua0eihae
+serial:
+  port: /dev/ttyACM0
+  adapter: deconz
+frontend:
+  port: 8099
+devices:
+  '0x00124b002444ce95':
+    friendly_name: Motion_1
+  '0x94deb8fffeee9a39':
+    friendly_name: V-Blind-Family
+permit_join: false
+availability: true

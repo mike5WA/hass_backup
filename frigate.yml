@@ -1,0 +1,123 @@
+mqtt:
+  host: 10.10.0.5
+  port: 1883
+  topic_prefix: frigate
+  client_id: frigate
+  user: mymqtt
+  password: gy7o99fg
+  stats_interval: 60
+detectors:
+  cpu1:
+    type: cpu
+      
+cameras:
+  Balcony_D47: 
+    ffmpeg:
+      inputs:
+        - path: rtsp://mike:be1DonD47@10.10.0.34:88/videoSub
+          roles:
+            - detect
+        - path: rtsp://mike:be1DonD47@10.10.0.34:88/videoMain
+          roles:
+            - record
+            - rtmp
+    rtmp:
+      enabled: true
+    detect:
+      width: 640
+      height: 480
+      fps: 5
+      enabled: True
+      max_disappeared: 25
+    objects:
+      track:
+        - person
+        - car
+      filters:
+        person:
+          threshold: 0.5
+    snapshots:
+      enabled: True
+      timestamp: False
+      retain:
+        default: 7
+    motion:
+      mask:
+        - 0,244,455,118,549,51,552,0,0,0
+        - 640,480,510,480,640,290
+        - 0,207,66,199,122,359,0,419
+    record:
+      enabled: True
+      expire_interval: 60
+      retain:
+        days: 5
+        mode: active_objects
+      events:
+        required_zones:
+          - driveway
+        retain:
+          default: 7
+          mode: active_objects
+    zones:
+      driveway:
+        coordinates: 539,233,640,187,640,50,144,215,342,480,515,480,640,302  
+        objects:
+          - person
+          - car
+          
+  Front-Door:
+    ffmpeg:
+      inputs:
+        - path: rtsp://mike:be1DonFD@10.10.0.33:554/videoMain
+          roles:
+            - detect
+            - record
+            - rtmp
+    rtmp:
+      enabled: true
+    detect:
+      width: 640
+      height: 380
+      fps: 5
+      enabled: True
+      max_disappeared: 25
+    objects:
+      track:
+        - person
+      filters:
+        person:
+          threshold: 0.5
+    snapshots:
+      enabled: True
+      timestamp: False
+      retain:
+        default: 7
+    motion:
+      mask:
+        - 229,380,226,0,0,0,0,380
+        - 353,99,407,0,324,0
+        - 640,0,575,168,501,121,514,0
+    record:
+      enabled: True
+      expire_interval: 60
+      retain:
+        days: 5
+        mode: active_objects
+      events:
+        required_zones:
+          - porch
+        retain:
+          default: 7
+          mode: active_objects
+    zones:
+      porch:
+        coordinates: 511,380,564,218,488,118,514,0,237,0,243,380  
+        objects:
+          - person
+
+
+
+           
+
+
+
