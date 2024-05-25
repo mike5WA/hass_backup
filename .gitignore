@@ -2,7 +2,7 @@
 !.gitignore
 !.md
 !.sh
-!js !node-red/ !node-red/ !node-red/ !node-red/ !node-red
+!js !node-red/
 !node-red/
 notebooks/
 esphome/
@@ -13,7 +13,11 @@ secrets.yaml
 .storage
 .cloud
 .google.token
-home-assistant.log.log*.txt
+home-assistant.log
+home-assistant_v2
 log*.txt
 id_rsa*
+frigate.db
+image/*
+www/community/*
 
