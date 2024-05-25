@@ -185,3 +185,5 @@ Traceback (most recent call last):
     is_off = self._unit.PowerState == "Off"
              ^^^^^^^^^^^^^^^^^^^^^
 AttributeError: 'AirTouchGroup' object has no attribute 'PowerState'
+2024-05-25 17:50:00.003 WARNING (MainThread) [homeassistant.helpers.frame] Detected that custom integration 'scheduler' calls `async_track_state_change` instead of `async_track_state_change_event` which is deprecated and will be removed in Home Assistant 2025.5 at custom_components/scheduler/actions.py, line 401: async_track_state_change(, please create a bug report at https://github.com/nielsfaber/scheduler-component/issues
+2024-05-25 17:59:41.436 WARNING (MainThread) [hass_nabucasa.cloud_api] Fetched https://alexa-api.nabucasa.com/access_token (400)
