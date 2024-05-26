@@ -187,3 +187,238 @@ Traceback (most recent call last):
 AttributeError: 'AirTouchGroup' object has no attribute 'PowerState'
 2024-05-25 17:50:00.003 WARNING (MainThread) [homeassistant.helpers.frame] Detected that custom integration 'scheduler' calls `async_track_state_change` instead of `async_track_state_change_event` which is deprecated and will be removed in Home Assistant 2025.5 at custom_components/scheduler/actions.py, line 401: async_track_state_change(, please create a bug report at https://github.com/nielsfaber/scheduler-component/issues
 2024-05-25 17:59:41.436 WARNING (MainThread) [hass_nabucasa.cloud_api] Fetched https://alexa-api.nabucasa.com/access_token (400)
+2024-05-25 18:36:01.480 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-25 18:36:01.480 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-25 18:38:11.675 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-25 18:40:15.175 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-25 18:40:15.175 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-25 18:42:25.367 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-25 18:42:45.190 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Failed to connect to service HostServiceInfo(host='10.10.0.21', port=8009), retrying in 5.0s
+2024-05-25 21:57:14.783 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-25 21:57:14.783 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-25 21:59:24.976 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-25 21:59:24.976 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-25 22:01:31.785 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-25 22:01:31.785 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-25 22:03:38.567 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-25 22:03:38.567 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-25 22:06:48.977 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-25 22:06:48.977 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-25 22:10:00.940 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-25 22:10:00.940 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-25 22:12:11.131 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-25 22:12:41.161 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Failed to connect to service HostServiceInfo(host='10.10.0.21', port=8009), retrying in 5.0s
+2024-05-26 01:14:28.103 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 01:14:28.103 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 01:16:31.623 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 01:16:31.623 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 01:20:22.120 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 01:20:22.120 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 01:23:33.199 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 01:23:33.199 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 01:29:13.599 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-26 01:31:15.463 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 01:31:15.463 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 01:36:47.313 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 01:36:47.313 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 01:39:58.391 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 01:39:58.392 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 01:43:18.650 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-26 01:43:32.934 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Failed to connect to service HostServiceInfo(host='10.10.0.21', port=8009), retrying in 5.0s
+2024-05-26 02:03:23.857 ERROR (Thread-4) [pychromecast.socket_client] [Cave Nest(10.10.0.225):8009] Error reading from socket.
+2024-05-26 02:03:23.857 WARNING (Thread-4) [pychromecast.socket_client] [Cave Nest(10.10.0.225):8009] Error communicating with socket, resetting connection
+2024-05-26 02:03:23.860 ERROR (Thread-4) [pychromecast.socket_client] [Cave Nest(10.10.0.225):8009] Failed to connect to service HostServiceInfo(host='10.10.0.225', port=8009), retrying in 5.0s
+2024-05-26 02:43:44.929 ERROR (Thread-5) [pychromecast.socket_client] [Kitchen display(10.10.0.31):8009] Error reading from socket.
+2024-05-26 02:43:44.929 WARNING (Thread-5) [pychromecast.socket_client] [Kitchen display(10.10.0.31):8009] Error communicating with socket, resetting connection
+2024-05-26 02:43:44.932 ERROR (Thread-5) [pychromecast.socket_client] [Kitchen display(10.10.0.31):8009] Failed to connect to service HostServiceInfo(host='10.10.0.31', port=8009), retrying in 5.0s
+2024-05-26 02:47:10.158 ERROR (MainThread) [homeassistant.components.airtouch4.coordinator] Unexpected error fetching airtouch4 data
+Traceback (most recent call last):
+  File "/usr/src/homeassistant/homeassistant/helpers/update_coordinator.py", line 315, in _async_refresh
+    self.data = await self._async_update_data()
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/airtouch4/coordinator.py", line 31, in _async_update_data
+    await self.airtouch.UpdateInfo()
+  File "/usr/local/lib/python3.12/site-packages/airtouch4pyapi/airtouch.py", line 76, in UpdateInfo
+    await self.SendMessageToAirtouch(acsMessage)
+  File "/usr/local/lib/python3.12/site-packages/airtouch4pyapi/airtouch.py", line 251, in SendMessageToAirtouch
+    return self.TranslatePacketToMessage(dataResult)
+                                         ^^^^^^^^^^
+UnboundLocalError: cannot access local variable 'dataResult' where it is not associated with a value
+2024-05-26 02:47:10.159 ERROR (MainThread) [homeassistant] Error doing job: Task exception was never retrieved
+Traceback (most recent call last):
+  File "/usr/src/homeassistant/homeassistant/helpers/update_coordinator.py", line 258, in _handle_refresh_interval
+    await self._async_refresh(log_failures=True, scheduled=True)
+  File "/usr/src/homeassistant/homeassistant/helpers/update_coordinator.py", line 414, in _async_refresh
+    self.async_update_listeners()
+  File "/usr/src/homeassistant/homeassistant/helpers/update_coordinator.py", line 168, in async_update_listeners
+    update_callback()
+  File "/usr/src/homeassistant/homeassistant/components/airtouch4/climate.py", line 227, in _handle_coordinator_update
+    return super()._handle_coordinator_update()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/helpers/update_coordinator.py", line 492, in _handle_coordinator_update
+    self.async_write_ha_state()
+  File "/usr/src/homeassistant/homeassistant/helpers/entity.py", line 1009, in async_write_ha_state
+    self._async_write_ha_state()
+  File "/usr/src/homeassistant/homeassistant/helpers/entity.py", line 1132, in _async_write_ha_state
+    state, attr, capabilities, shadowed_attr = self.__async_calculate_state()
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/helpers/entity.py", line 1062, in __async_calculate_state
+    capability_attr = self.capability_attributes
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/climate/__init__.py", line 324, in __getattribute__
+    return super().__getattribute__(__name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/climate/__init__.py", line 482, in capability_attributes
+    ATTR_MIN_TEMP: show_temp(hass, self.min_temp, temperature_unit, precision),
+                                   ^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/climate/__init__.py", line 324, in __getattribute__
+    return super().__getattribute__(__name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/airtouch4/climate.py", line 232, in min_temp
+    return self._airtouch.acs[self._unit.BelongsToAc].MinSetpoint
+           ~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+KeyError: -1
+2024-05-26 03:41:59.974 ERROR (MainThread) [homeassistant.components.xiaomi_miio] Timeout fetching Roborock S6 data
+2024-05-26 05:11:01.162 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-26 05:11:15.462 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Failed to connect to service HostServiceInfo(host='10.10.0.21', port=8009), retrying in 5.0s
+2024-05-26 05:14:48.629 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-26 05:15:18.661 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Failed to connect to service HostServiceInfo(host='10.10.0.21', port=8009), retrying in 5.0s
+2024-05-26 06:40:18.074 WARNING (MainThread) [homeassistant.helpers.service] Referenced entities cover.0x94deb8fffeee9a39 are missing or not currently available
+2024-05-26 07:03:20.205 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-26 07:03:50.236 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Failed to connect to service HostServiceInfo(host='10.10.0.21', port=8009), retrying in 5.0s
+2024-05-26 08:19:01.257 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 08:19:01.257 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 08:21:11.448 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-26 08:24:21.704 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-26 08:29:43.751 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 08:29:43.751 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 08:32:55.697 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 08:32:55.697 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 08:36:05.972 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 08:36:05.972 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 08:38:16.163 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-26 08:40:19.656 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 08:40:19.656 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 08:43:39.921 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-26 08:44:09.951 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Failed to connect to service HostServiceInfo(host='10.10.0.21', port=8009), retrying in 5.0s
+2024-05-26 10:15:31.219 WARNING (MainThread) [homeassistant.helpers.service] Referenced entities cover.0x94deb8fffeee9a39 are missing or not currently available
+2024-05-26 10:32:21.795 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-26 10:32:51.826 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Failed to connect to service HostServiceInfo(host='10.10.0.21', port=8009), retrying in 5.0s
+2024-05-26 10:50:59.841 ERROR (MainThread) [homeassistant.components.websocket_api.http.connection] [140356638352960] Unexpected exception
+Traceback (most recent call last):
+  File "/usr/src/homeassistant/homeassistant/components/websocket_api/commands.py", line 239, in handle_call_service
+    response = await hass.services.async_call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/core.py", line 2738, in async_call
+    response_data = await coro
+                    ^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/core.py", line 2779, in _execute_service
+    return await target(service_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/helpers/service.py", line 1000, in entity_service_call
+    raise result from None
+  File "/usr/src/homeassistant/homeassistant/helpers/entity.py", line 1605, in async_request_call
+    return await coro
+           ^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/helpers/service.py", line 1047, in _handle_entity_call
+    result = await task
+             ^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/airtouch4/climate.py", line 322, in async_turn_on
+    await self.coordinator.async_request_refresh()
+  File "/usr/src/homeassistant/homeassistant/helpers/update_coordinator.py", line 265, in async_request_refresh
+    await self._debounced_refresh.async_call()
+  File "/usr/src/homeassistant/homeassistant/helpers/debounce.py", line 117, in async_call
+    await task
+  File "/usr/src/homeassistant/homeassistant/helpers/update_coordinator.py", line 291, in async_refresh
+    await self._async_refresh(log_failures=True)
+  File "/usr/src/homeassistant/homeassistant/helpers/update_coordinator.py", line 414, in _async_refresh
+    self.async_update_listeners()
+  File "/usr/src/homeassistant/homeassistant/helpers/update_coordinator.py", line 168, in async_update_listeners
+    update_callback()
+  File "/usr/src/homeassistant/homeassistant/components/airtouch4/climate.py", line 227, in _handle_coordinator_update
+    return super()._handle_coordinator_update()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/helpers/update_coordinator.py", line 492, in _handle_coordinator_update
+    self.async_write_ha_state()
+  File "/usr/src/homeassistant/homeassistant/helpers/entity.py", line 1009, in async_write_ha_state
+    self._async_write_ha_state()
+  File "/usr/src/homeassistant/homeassistant/helpers/entity.py", line 1132, in _async_write_ha_state
+    state, attr, capabilities, shadowed_attr = self.__async_calculate_state()
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/helpers/entity.py", line 1067, in __async_calculate_state
+    state = self._stringify_state(available)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/helpers/entity.py", line 1015, in _stringify_state
+    if (state := self.state) is None:
+                 ^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/climate/__init__.py", line 324, in __getattribute__
+    return super().__getattribute__(__name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/climate/__init__.py", line 455, in state
+    hvac_mode = self.hvac_mode
+                ^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/climate/__init__.py", line 324, in __getattribute__
+    return super().__getattribute__(__name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/airtouch4/climate.py", line 253, in hvac_mode
+    is_off = self._unit.PowerState == "Off"
+             ^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AirTouchGroup' object has no attribute 'PowerState'
+2024-05-26 11:10:59.551 WARNING (MainThread) [homeassistant.helpers.service] Referenced entities sensor.nodered_11ee0bb47c22109e are missing or not currently available
+2024-05-26 11:30:59.700 WARNING (MainThread) [homeassistant.helpers.service] Referenced entities sensor.nodered_11ee0bb47c22109e are missing or not currently available
+2024-05-26 11:50:59.803 WARNING (MainThread) [homeassistant.helpers.service] Referenced entities sensor.nodered_11ee0bb47c22109e are missing or not currently available
+2024-05-26 11:50:59.976 ERROR (MainThread) [homeassistant.components.websocket_api.http.connection] [140356638352960] Unexpected exception
+Traceback (most recent call last):
+  File "/usr/src/homeassistant/homeassistant/components/websocket_api/commands.py", line 239, in handle_call_service
+    response = await hass.services.async_call(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/core.py", line 2738, in async_call
+    response_data = await coro
+                    ^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/core.py", line 2779, in _execute_service
+    return await target(service_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/helpers/service.py", line 975, in entity_service_call
+    single_response = await _handle_entity_call(
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/helpers/service.py", line 1047, in _handle_entity_call
+    result = await task
+             ^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/climate/__init__.py", line 729, in async_handle_set_fan_mode_service
+    await self.async_set_fan_mode(fan_mode)
+  File "/usr/src/homeassistant/homeassistant/components/airtouch4/climate.py", line 179, in async_set_fan_mode
+    self.async_write_ha_state()
+  File "/usr/src/homeassistant/homeassistant/helpers/entity.py", line 1009, in async_write_ha_state
+    self._async_write_ha_state()
+  File "/usr/src/homeassistant/homeassistant/helpers/entity.py", line 1132, in _async_write_ha_state
+    state, attr, capabilities, shadowed_attr = self.__async_calculate_state()
+                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/helpers/entity.py", line 1062, in __async_calculate_state
+    capability_attr = self.capability_attributes
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/climate/__init__.py", line 324, in __getattribute__
+    return super().__getattribute__(__name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/climate/__init__.py", line 481, in capability_attributes
+    ATTR_HVAC_MODES: self.hvac_modes,
+                     ^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/climate/__init__.py", line 324, in __getattribute__
+    return super().__getattribute__(__name)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/homeassistant/homeassistant/components/airtouch4/climate.py", line 148, in hvac_modes
+    airtouch_modes = self._airtouch.GetSupportedCoolingModesForAc(self._ac_number)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.12/site-packages/airtouch4pyapi/airtouch.py", line 163, in GetSupportedCoolingModesForAc
+    return self.acs[acNumber].ModeSupported;
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'AirTouchAc' object has no attribute 'ModeSupported'
+2024-05-26 12:07:39.710 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error reading from socket.
+2024-05-26 12:07:39.710 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Error communicating with socket, resetting connection
+2024-05-26 12:09:49.919 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-26 12:10:59.691 WARNING (MainThread) [homeassistant.helpers.service] Referenced entities sensor.nodered_11ee0bb47c22109e are missing or not currently available
+2024-05-26 12:13:00.189 WARNING (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Heartbeat timeout, resetting connection
+2024-05-26 12:13:14.503 ERROR (Thread-16) [pychromecast.socket_client] [TV(10.10.0.21):8009] Failed to connect to service HostServiceInfo(host='10.10.0.21', port=8009), retrying in 5.0s
+2024-05-26 12:30:31.216 WARNING (MainThread) [homeassistant.helpers.service] Referenced entities cover.0x94deb8fffeee9a39 are missing or not currently available
+2024-05-26 12:30:59.674 WARNING (MainThread) [homeassistant.helpers.service] Referenced entities sensor.nodered_11ee0bb47c22109e are missing or not currently available
+2024-05-26 12:50:59.704 WARNING (MainThread) [homeassistant.helpers.service] Referenced entities sensor.nodered_11ee0bb47c22109e are missing or not currently available
+2024-05-26 13:10:59.802 WARNING (MainThread) [homeassistant.helpers.service] Referenced entities sensor.nodered_11ee0bb47c22109e are missing or not currently available

@@ -2,7 +2,7 @@
 !.gitignore
 !.md
 !.sh
-!js !node-red/
+!js
 !node-red/
 notebooks/
 esphome/
