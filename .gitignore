@@ -1,11 +1,14 @@
-!.yaml
-!.gitignore
-!.md
-!.sh
-!js
-!node-red/
+# To backup to git
+#!.yaml
+#!.gitignore
+#!.md
+#!.sh
+#!js
+#!node-red/
+
+# To ignore
+frigate.db
 notebooks/
-esphome/
 custom_components/
 zigbee2mqtt/log/
 secrets.yaml
@@ -13,11 +16,10 @@ secrets.yaml
 .storage
 .cloud
 .google.token
-home-assistant.log
+./home-assistant.log
 home-assistant_v2
 log*.txt
 id_rsa*
-frigate.db
 image/*
 www/community/*
 

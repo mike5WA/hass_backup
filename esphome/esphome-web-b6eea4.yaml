@@ -1,0 +1,106 @@
+substitutions:
+  name: retic
+  friendly_name: Reticulation
+  # Controller switches 
+  sprinkler_control: Controller
+  zone_0_name: Pump
+  zone_1_name: valve_1
+  zone_2_name: valve_2
+  zone_3_name: Valve_3
+  zone_4_name: valve_4
+  zone_5_name: valve_5
+  zone_6_name: valve_6
+  zone_7_name: valve_7
+
+  sensor_update_frequency: 1s
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  name_add_mac_suffix: false
+  project:
+    name: esphome.web
+    version: '1.0'
+
+esp32:
+  #board: esp32dev
+  board: nodemcu-32s
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+
+# Allow Over-The-Air updates
+ota:
+
+# Allow provisioning Wi-Fi via serial
+#improv_serial:
+
+wifi:
+  use_address: retic.local
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  manual_ip:
+    static_ip: 10.10.0.69
+    gateway: 10.10.0.1
+    subnet: 255.255.0.0
+
+  # Set up a wifi access point
+  ap: {}
+
+# In combination with the `ap` this allows the user
+# to provision wifi credentials to the device via WiFi AP.
+captive_portal:
+
+dashboard_import:
+  package_import_url: github://esphome/example-configs/esphome-web/esp32.yaml@main
+  import_full_config: true
+
+# Sets up Bluetooth LE (Only on ESP32) to allow the user
+# to provision wifi credentials to the device.
+#esp32_improv:
+#  authorizer: none
+
+# To have a "next url" for improv serial
+web_server:
+
+############################################
+## SPI config for display using HSPI
+spi:
+  id: 'spi3'
+  mosi_pin: 23  #Pin 37 to Oled DIN
+  miso_pin: 32 # Dummy Pin. Required? TODO: Check
+  clk_pin: 18   #Pin 30 to oled CLK
+
+font:
+  - file: "gfonts://Roboto"
+    id: roboto_12
+    size: 12
+
+display:
+  - platform: ssd1306_spi
+#    reset_pin: GPIO23   # Pin 37  to Oled Rst
+    model: "SSD1305 128x64" 
+    id: retic_display
+    dc_pin: 19    # Pin 33 to Oled DC
+    cs_pin: 5     # Pin 23 to Oled DC
+    #reset_pin: 22
+    # spi_id: 'spi3'
+
+    lambda: |-
+      it.print(0, 10, id(roboto_12), "Hello World!");
+      it.line(20, 20, 50, 50);
+
+output:
+  - platform: gpio
+    pin: GPIO22
+    id: 'generic_out'
+    
+switch:
+  - platform: output
+    name: "Screen Enable"
+    output: 'generic_out'

@@ -1,0 +1,182 @@
+esphome:
+  name: "fish-tank"
+
+esp8266:
+  board: huzzah
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API. Disabled as kept loosing connection
+api:
+  encryption:
+    key: 5zW+RPh48JV73gJlIXCLNgAzkXReWO1pkPPRgxXAFrE=
+    
+ota:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esphome-Web-0A8Db9"
+    password: "DscLg1lMVpju"
+
+  # Manual IP
+  manual_ip:
+    static_ip: 10.10.0.38
+    gateway: 10.10.0.1
+    subnet: 255.255.0.0
+
+captive_portal:
+
+# Define output pins for temp and ph led
+output:
+# red-led ph
+  - id: GPIO12
+    platform: gpio
+    pin: 
+      number: GPIO12
+      allow_other_uses: true
+    
+# red-led temp
+  - id: GPIO13
+    platform: gpio
+    pin:
+      number: GPIO13
+      allow_other_uses: true
+    
+# green-led ph
+  - id: GPIO15
+    platform: gpio
+    pin:
+      number: GPIO15
+      allow_other_uses: true
+    
+# green-led temp
+  - id: GPIO16
+    platform: gpio
+    pin:
+      number: GPIO16
+      allow_other_uses: true
+    
+
+# Create switch object to turn outputs on/off
+switch:
+  - platform: gpio
+    pin:
+      number: GPIO12
+      allow_other_uses: true
+    id: red_ph
+    
+  - platform: gpio
+    pin:
+      number: GPIO13
+      allow_other_uses: true
+    id: red_temp    
+
+  - platform: gpio
+    pin:
+      number: GPIO15
+      allow_other_uses: true
+    id: green_ph    
+
+  - platform: gpio
+    pin:
+      number: GPIO16
+      allow_other_uses: true
+    id: green_temp
+
+# Dallas 18B29 temp sensor config
+dallas:
+  - pin: 5
+    update_interval: 60s
+
+# This gets the sensor reading
+sensor:
+  - platform: dallas
+    address: 0xa23c01f09636d428
+    name: "Fish Tank Temp"
+    accuracy_decimals: 2
+    id: tempC
+  
+    on_value:
+       
+      # Routine to check value against min/max and turn on/off led
+      - lambda: |-
+          if ((id(tempC).state) >24.0 and (id(tempC).state) <30.0)
+          {
+          id(red_temp).turn_off();
+          id(green_temp).turn_on();
+          } else
+          {
+          id(green_temp).turn_off();
+          id(red_temp).turn_on();
+          }
+      - logger.log:
+          format: "Temp sensor reports value %.1f"
+          args: ['id(tempC).state']
+         
+
+# Configure ph sensor
+  - platform: adc
+    pin: A0
+    name: "Water PH"
+    unit_of_measurement: "ph"
+    update_interval: 10s
+    id: ph
+
+    on_value: 
+# Check against min/max id(ph).state
+      lambda: |-
+        if ((id(tempC).state) >24.0 and (id(tempC).state) <30.0)
+        {
+        id(red_temp).turn_off();
+        id(green_temp).turn_on();
+        } else
+        {
+        id(green_temp).turn_off();
+        id(red_temp).turn_on();
+        }
+# Filter to smooth out and trim spurious readings
+    filters:
+      - median:
+          window_size: 12
+          send_every: 12
+          send_first_at: 6
+
+      - quantile:
+          window_size: 11
+          send_every: 6
+          send_first_at: 3
+          quantile: .9
+
+# ESP_LOGD is debug log output
+      - lambda: |-
+          ESP_LOGD("ph", "A0 =%f", x);
+          return x;
+# Measured A0 -> Actual ph (buffer solution)
+# Lower the potentiometer (counter clockwise)
+# for known ph eg 7.5 = .536v =A0 548
+# Pick a baseline voltage (log entry above) on the low end of range
+# to  leave room for the higher voltage of low ph.
+# Then switch to known low ph and note voltage.
+# Do not worry about expected voltages (eg 2.5v) found in random tutorials
+# For ph of 5.25 got voltage of 0.575v = A0 0,588
+      - calibrate_linear:
+        - 0.53 -> 7.5
+        - 0.60 -> 5.25
+      - lambda: |-
+          ESP_LOGD("ph", "read=%fph", x);
+          return x;
+
+    
+  
+
+         
+  
+# To display values of ph
+#        - logger.log:
+#               format: "ph sensor reorts value %.1f"
+#                args: ['id(ph).state']
