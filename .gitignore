@@ -7,7 +7,7 @@
 #!node-red/
 
 # To ignore
-frigate.db
+frigate.db*
 notebooks/
 custom_components/
 zigbee2mqtt/log/
@@ -16,10 +16,11 @@ secrets.yaml
 .storage
 .cloud
 .google.token
-./home-assistant.log
-home-assistant_v2
+home-assistant.log
+home-assistant_v2*
 log*.txt
 id_rsa*
 image/*
 www/community/*
-
+zigbee2mqtt/database.db
+zigbee2mqtt/state.json
