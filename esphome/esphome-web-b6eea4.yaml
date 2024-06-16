@@ -1,18 +1,27 @@
+##########################################################
+# ESP 32
+# Display 2.4" OLED 
+########################################################3
+
+
 substitutions:
   name: retic
   friendly_name: Reticulation
+  device_name: controller
+
   # Controller switches 
   sprinkler_control: Controller
-  zone_0_name: Pump
-  zone_1_name: valve_1
-  zone_2_name: valve_2
-  zone_3_name: Valve_3
-  zone_4_name: valve_4
-  zone_5_name: valve_5
-  zone_6_name: valve_6
-  zone_7_name: valve_7
+  zone_0_name: Pump       # GPIO 32/D7
+  zone_1_name: valve_1    # GPIO 33/D8
+  zone_2_name: valve_2    # GPIO 25/D9
+  zone_3_name: Valve_3    # GPIO 26/D10
+  zone_4_name: valve_4    # GPIO 27/D11
+  zone_5_name: valve_5    # GPIO 14/D12
+  zone_6_name: valve_6    # GPIO 12/D13
+  zone_7_name: valve_7    # GPIO 13/D15
 
   sensor_update_frequency: 1s
+
 esphome:
   name: ${name}
   friendly_name: ${friendly_name}
@@ -40,7 +49,7 @@ ota:
 #improv_serial:
 
 wifi:
-  use_address: retic.local
+#  use_address: retic.local
   ssid: !secret wifi_ssid
   password: !secret wifi_password
 
@@ -54,6 +63,11 @@ wifi:
 
 # In combination with the `ap` this allows the user
 # to provision wifi credentials to the device via WiFi AP.
+font:
+  - file: "gfonts://Roboto"
+    id: roboto_10
+    size: 12
+
 captive_portal:
 
 dashboard_import:
@@ -68,39 +82,318 @@ dashboard_import:
 # To have a "next url" for improv serial
 web_server:
 
-############################################
-## SPI config for display using HSPI
-spi:
-  id: 'spi3'
-  mosi_pin: 23  #Pin 37 to Oled DIN
-  miso_pin: 32 # Dummy Pin. Required? TODO: Check
-  clk_pin: 18   #Pin 30 to oled CLK
+# Get the time from Home Assistant to sync the onboard real-time clock.
+time:
+  - platform: homeassistant
+    id: esptime
 
-font:
-  - file: "gfonts://Roboto"
-    id: roboto_12
-    size: 12
+
+##########################################################
+## 2.4" OLED 128x64 SKU 2574 Driver SSD1309/SSD1306
+## SPI config for display using VSPI and SSD1306 driver ##
+###########################################################
+spi:
+  mosi_pin: GPIO23    # Pin 37 to Oled DIN
+  clk_pin: GPIO18     # Pin 30 to oled CLK
+  interface: hardware
 
 display:
   - platform: ssd1306_spi
-#    reset_pin: GPIO23   # Pin 37  to Oled Rst
-    model: "SSD1305 128x64" 
-    id: retic_display
-    dc_pin: 19    # Pin 33 to Oled DC
-    cs_pin: 5     # Pin 23 to Oled DC
-    #reset_pin: 22
-    # spi_id: 'spi3'
+    model: SSD1306_128X64
+    cs_pin: GPIO5
+    dc_pin: GPIO19
+    reset_pin: GPIO4
 
+# An if in c++ must be like this. if ( <logic statement ) { } 
+# eg if ((id(time_remaining).state) == "0s") { }
     lambda: |-
-      it.print(0, 10, id(roboto_12), "Hello World!");
-      it.line(20, 20, 50, 50);
+      //////////////////////////////////////////////////////////////////////////////////////
+      // Print time in HH:MM format bottom left
+      it.strftime(0, 60, id(roboto_10), TextAlign::BASELINE_LEFT, "%H:%M", id(esptime).now());
+      ////////////////////////////////////////////////////////////////////////////////////////
+      // Print active valve and time remaining
+      if (id($device_name).active_valve().has_value()) {
+      // the controller is running, get the active valve into running_valve and print it
+      auto running_valve = (id($device_name).active_valve().value())+1;
+      it.printf(10, 15, id(roboto_10), "Valve %u active", running_valve);
+      it.printf(10, 27, id(roboto_10), "Time To Run: " "%s" , id(time_remaining).state.c_str());
+      } else {
+      // the controller is NOT running
+      it.print(25, 15, id(roboto_10), "Controller Idle");
+      }
 
-output:
+###############################################
+# Text sensors with general information.
+###############################################
+
+text_sensor:
+# Expose Time Remaining for running zone as a sensor.
+# In display lambda use with printf as above inserting %s and .c_str()
+  - platform: template
+    id: time_remaining
+    name: Zone_Time_Remaining
+    update_interval: $sensor_update_frequency
+    icon: "mdi:timer-sand"
+    lambda: |-
+      int seconds = round(id($device_name).time_remaining_active_valve().value_or(0));
+      int days = seconds / (24 * 3600);
+      seconds = seconds % (24 * 3600);
+      int hours = seconds / 3600;
+      seconds = seconds % 3600;
+      int minutes = seconds /  60;
+      seconds = seconds % 60;
+        return {
+          ((days ? String(days) + "d " : "") + 
+          (hours ? String(hours) + "h " : "") +
+          (minutes ? String(minutes) + "m " : "") +
+          (String(seconds) + "s")).c_str()};
+
+# Expose Valve Status as a sensor.
+  - platform: template
+    id: valve_status
+    name: $device_name Status
+    update_interval: never
+    icon: "mdi:information-variant"
+
+# Section to manage the sprinkler controller actions
+sprinkler:
+  - id: $device_name
+    main_switch: $sprinkler_control Run
+    auto_advance_switch: $sprinkler_control Auto Advance
+    reverse_switch: $sprinkler_control Reverse
+    pump_start_pump_delay: 2s
+    pump_stop_valve_delay: 1s
+    valve_overlap: 2s
+
+# Activate switch + pump, designate solenoid to operate
+# Pump GPIO 32 pin 7;             
+    valves:  
+      - valve_switch: $zone_1_name
+        enable_switch: Enable $zone_1_name
+        pump_switch_id: pin_7
+        run_duration_number: 
+          name: time_zone_1
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_8  # GPIO 33
+
+      - valve_switch: $zone_2_name
+        enable_switch: Enable $zone_2_name
+        pump_switch_id: pin_7
+        run_duration_number:
+          name: time_Zone_2
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_9   # GPIO 25
+
+      - valve_switch: $zone_3_name
+        enable_switch: Enable $zone_3_name
+        pump_switch_id: pin_7
+        run_duration_number:
+          name: time_zone_3
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_10   # GPIO 26
+
+      - valve_switch: $zone_4_name
+        enable_switch: Enable $zone_4_name
+        pump_switch_id: pin_7
+        run_duration_number:
+          name: time_zone_4
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_11  # GPIO 27
+
+      - valve_switch: $zone_5_name
+        enable_switch: Enable $zone_5_name
+        pump_switch_id: pin_7
+        run_duration_number:
+          name: time_zone_5
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_12  # GPIO 14
+
+      - valve_switch: $zone_6_name
+        enable_switch: Enable $zone_6_name
+        pump_switch_id: pin_7
+        run_duration_number:
+          name: time_zone_6
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_13  #  GPIO 12
+
+      - valve_switch: $zone_7_name
+        enable_switch: Enable $zone_7_name
+        pump_switch_id: pin_7
+        run_duration_number:
+          name: time_zone_7
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_15   # GPIO 13
+
+# Set multiplier to apply to all enabled run times
+    multiplier_number:
+      id: time_multiplier
+      name: "Time Multiplier"
+      initial_value: 1
+      min_value: 0.2
+      max_value: 5
+      step: 0.2
+      icon: "mdi:timer-outline"
+      mode: BOX
+      on_value:   # Value given
+        then:
+          - sprinkler.set_multiplier:   # Action set multiplier routine
+              id: $device_name 
+              multiplier:
+                !lambda "return x;"     # Get/pass value of time_multiplier 
+
+# Number of times to repeat sprinkler cycle
+    repeat_number: 
+      id: repeat_number
+      name: Repeat_Cycle
+      initial_value: 0
+      min_value: 0
+      max_value: 5
+      step: 1
+      restore_value: True
+      disabled_by_default: False
+      icon: "mdi:timer-outline"
+      mode: BOX
+      on_value: 
+        then:
+          - sprinkler.set_repeat: !lambda "return x;"   
+
+
+
+#################################################
+# Allocate valves/solenoids to ESP GPIO pins
+#################################################
+switch: 
   - platform: gpio
-    pin: GPIO22
-    id: 'generic_out'
-    
-switch:
-  - platform: output
-    name: "Screen Enable"
-    output: 'generic_out'
+    name: $zone_0_name valve
+    id: pin_7
+    pin: GPIO32
+     
+  - platform: gpio
+    name: $zone_1_name valve
+    id: pin_8
+    pin: GPIO33
+
+  - platform: gpio
+    name: $zone_2_name valve
+    id: pin_9
+    pin: GPIO25
+
+  - platform: gpio  
+    name: $zone_3_name valve
+    id: pin_10
+    pin: GPIO26
+      
+  - platform: gpio  
+    name: $zone_4_name valve
+    id: pin_11
+    pin: GPIO27
+  
+  - platform: gpio  
+    name: $zone_5_name valve
+    id: pin_12
+    pin: GPIO14
+
+  - platform: gpio  
+    name: $zone_6_name valve
+    id: pin_13
+    pin: GPIO12
+
+  - platform: gpio  
+    name: $zone_7_name valve
+    id: pin_15
+    pin: GPIO13
+#####################################################
+
+# Buttons for sundry actions
+button:
+# Button to pause cycle  
+  - platform: template
+    id: sprinkler_pause
+    name: "Pause"
+    icon: "mdi:pause"
+    on_press:
+      then:
+        - text_sensor.template.publish:
+            id: valve_status
+            state: "Paused"
+        - sprinkler.pause: $device_name 
+
+# Button to restart cycle
+  - platform: template
+    id: sprinkler_resume
+    name: "Resume"
+    icon: "mdi:run"
+    on_press:
+      then:
+        - text_sensor.template.publish:
+            id: valve_status
+            state: "Resumed"
+        - sprinkler.resume: $device_name        
+
+# Button to shutdown system
+  - platform: template
+    id: sprinkler_shutdown
+    name: "Shutdown"
+    icon: "mdi:stop"
+    on_press:
+      then:
+        - text_sensor.template.publish:
+            id: valve_status
+            state: "Idle"
+        - sprinkler.shutdown: $device_name   
