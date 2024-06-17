@@ -1,6 +1,7 @@
 ##########################################################
 # ESP 32
 # Display 2.4" OLED 
+# Path to fonts/icons /config/fonts
 ########################################################3
 
 
@@ -65,8 +66,29 @@ wifi:
 # to provision wifi credentials to the device via WiFi AP.
 font:
   - file: "gfonts://Roboto"
-    id: roboto_10
+    id: roboto_12
     size: 12
+
+  - file: "gfonts://Roboto"
+    id: roboto_10
+    size: 10
+
+  - file: '/config/fonts/PTSans-Regular.ttf'
+    id: ptsans_10
+    size: 10
+  
+  - file: '/config/fonts/materialdesignicons-webfont.ttf'
+    id: icon_font
+    size: 13
+    glyphs:
+      - "\U000F1060"  # mdi-sprinkler-variant
+      - "\U000F1067"  # mdi-valve-closed
+      - "\U000F1068"  # mdi- valve-open
+      - "\U000F0F93"  # mdi- waterpump-off
+      - "\U000F0585"  # mdi- waterpump
+      - "\U000F1482"  # mdi- watering can
+      - "\U000F1508"  # mdi- water-off-outline
+      - "\U000F058D"  # mdi- Water-off
 
 captive_portal:
 
@@ -107,20 +129,41 @@ display:
 # An if in c++ must be like this. if ( <logic statement ) { } 
 # eg if ((id(time_remaining).state) == "0s") { }
     lambda: |-
+      ////////////////////////////////////////////////////
+      // Draw the outline of a rectangle with the top left at [5,20], a width of 30 and a height of 42
+      it.rectangle(0, 0, 125, 64);
+      //Draw line above time & date
+      it.line(0, 46, 125, 46);
       //////////////////////////////////////////////////////////////////////////////////////
-      // Print time in HH:MM format bottom left
-      it.strftime(0, 60, id(roboto_10), TextAlign::BASELINE_LEFT, "%H:%M", id(esptime).now());
+      // DISPLAY TIME in HH:MM format bottom left
+      it.strftime(10, 60, id(ptsans_10), TextAlign::BASELINE_LEFT, "%H:%M:%S", id(esptime).now());
+      //DISPLAY DATE dd/mm/yy bottom right
+      it.strftime(110, 60, id(ptsans_10), TextAlign::BASELINE_RIGHT, "%a-%d-%b", id(esptime).now());
       ////////////////////////////////////////////////////////////////////////////////////////
-      // Print active valve and time remaining
+      // DISPLAY ACTIVE VALVE and time remaining
       if (id($device_name).active_valve().has_value()) {
-      // the controller is running, get the active valve into running_valve and print it
+      // THE CONTROLLER IS RUNNING, get the active valve into running_valve and print it
       auto running_valve = (id($device_name).active_valve().value())+1;
-      it.printf(10, 15, id(roboto_10), "Valve %u active", running_valve);
-      it.printf(10, 27, id(roboto_10), "Time To Run: " "%s" , id(time_remaining).state.c_str());
+      it.print(6, 6, id(icon_font), "\U000F1068");    // valve-open
+      it.print(105, 6, id(icon_font), "\U000F1060");  // sprinkler-variant
+      it.printf(30, 7, id(roboto_10), "Zone %u active", running_valve);
+      it.printf(17, 24, id(roboto_10), "Time To Run: " "%s" , id(time_remaining).state.c_str());
       } else {
-      // the controller is NOT running
-      it.print(25, 15, id(roboto_10), "Controller Idle");
+      // CONTROLLER is NOT running
+      it.filled_rectangle(13, 4, 110, 20, COLOR_OFF);
+      it.print(25, 5, id(roboto_12), "Controller Idle"); 
+      it.print(60, 22, id(icon_font), "\U000F0F93");
       }
+      //if ((id(valve_status).state) == "Paused") {
+      //it.filled_rectangle(13, 4, 110, 15, COLOR_OFF);
+      //it.print(20, 5, id(roboto_12), "Controller Paused");
+      //} 
+      //else {
+      //it.filled_rectangle(13, 4, 110, 20, COLOR_OFF);
+      //it.print(25, 5, id(roboto_12), "Controller Idle");  
+      //}
+      //it.print(25, 5, id(roboto_12), id(valve_status).state); 
+        
 
 ###############################################
 # Text sensors with general information.
