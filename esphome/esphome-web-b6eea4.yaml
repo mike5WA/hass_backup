@@ -4,7 +4,6 @@
 # Path to fonts/icons /config/fonts
 ########################################################3
 
-
 substitutions:
   name: retic
   friendly_name: Reticulation
@@ -147,16 +146,22 @@ display:
       it.print(6, 6, id(icon_font), "\U000F1068");    // valve-open
       it.print(105, 6, id(icon_font), "\U000F1060");  // sprinkler-variant
       it.printf(30, 7, id(roboto_10), "Zone %u active", running_valve);
-      it.printf(17, 24, id(roboto_10), "Time To Run: " "%s" , id(time_remaining).state.c_str());
-      } else {
+      it.printf(17, 24, id(roboto_10), "Time To Run : " "%s" , id(time_remaining).state.c_str());
+      } 
       // CONTROLLER is NOT running
+      // CHECK if on PAUSE if so display Paused
+      else if ((id(valve_status).state) == "Paused") {
+      it.print(15, 5, (roboto_12), "Controller Paused");
+      it.print(60, 22, id(icon_font), "\U000F0F93");
+      } else {
+      // Display IDLE
       it.filled_rectangle(13, 4, 110, 20, COLOR_OFF);
       it.print(25, 5, id(roboto_12), "Controller Idle"); 
       it.print(60, 22, id(icon_font), "\U000F0F93");
       }
-      //if ((id(valve_status).state) == "Paused") {
+      //
       //it.filled_rectangle(13, 4, 110, 15, COLOR_OFF);
-      //it.print(20, 5, id(roboto_12), "Controller Paused");
+      //
       //} 
       //else {
       //it.filled_rectangle(13, 4, 110, 20, COLOR_OFF);
