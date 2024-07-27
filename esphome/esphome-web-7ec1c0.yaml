@@ -1,0 +1,674 @@
+
+##########################################################
+# ESP 32
+# Display 2.4" OLED 
+# Path to fonts/icons /config/fonts
+########################################################3
+substitutions:
+  name: irrigation
+  friendly_name: Irrigation
+  device_name: controller
+  sensor_update_frequency: 1s 
+# Controller switches 
+  zone_0_name: Pump       # GPIO 32/D7
+  zone_1_name: valve_1    # GPIO 33/D8
+  zone_2_name: valve_2    # GPIO 25/D9
+  zone_3_name: Valve_3    # GPIO 26/D10
+  zone_4_name: valve_4    # GPIO 27/D11
+  zone_5_name: valve_5    # GPIO 14/D12
+  zone_6_name: valve_6    # GPIO 12/D13
+  zone_7_name: valve_7    # GPIO 13/D15
+  
+globals:
+  
+  - id: on_off_array    #Stores on/off for 7 days of week
+    type: int[7]
+    restore_value: True
+    initial_value: "{'0','0','0','0','0','0','0'}"
+
+  - id: start_day
+    type: int
+    restore_value: True
+    initial_value: '1'
+
+  - id: start_hour
+    type: int
+    restore_value: True
+    initial_value: '1'
+
+  - id: now_hour
+    type: int
+    restore_value: True
+    initial_value: '1'  
+
+  - id: start_minute
+    type: int
+    restore_value: True
+    initial_value: '1' 
+
+  - id: now_minute
+    type: int
+    restore_value: True
+    initial_value: '1' 
+
+  
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  min_version: 2024.6.0
+  name_add_mac_suffix: false
+  project:
+    name: esphome.web
+    version: '1.0'
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+  level: DEBUG
+    
+# Enable Home Assistant API
+api:
+
+# Allow Over-The-Air updates
+ota:
+- platform: esphome
+
+# Allow provisioning Wi-Fi via serial
+improv_serial:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+
+  manual_ip:
+    static_ip: 10.10.0.70
+    gateway: 10.10.0.1
+    subnet: 255.255.0.0
+
+  # Set up a wifi access point
+  ap: {}
+
+# In combination with the `ap` this allows the user
+# to provision wifi credentials to the device via WiFi AP.
+
+time:
+  - platform: homeassistant
+    id: hass_time
+    on_time: 
+     # Every 20 seconds check schedule start time
+      - seconds: /20
+        then:
+          - script.execute: on_today
+          
+##########################################################
+## 2.4" OLED 128x64 SKU 2574 Driver SSD1309/SSD1306
+## SPI config for display using VSPI and  SSD1306 driver ##
+spi:
+  mosi_pin: GPIO23    # Pin 37 to Oled DIN
+  clk_pin: GPIO18     # Pin 30 to oled CLK
+  interface: hardware
+
+#########################################################3
+## Define fonts, glyphs for use with display
+font:
+#  - file: "gfonts://Roboto"
+#    id: roboto_12
+#    size: 12
+
+  - file: "gfonts://Roboto"
+    id: roboto_10
+    size: 9
+
+  - file: '/config/fonts/PTSans-Regular.ttf'
+    id: ptsans_10
+    size: 9
+  
+  - file: '/config/fonts/materialdesignicons-webfont.ttf'
+    id: icon_font
+    size: 12
+    glyphs:
+      - "\U000F1060"  # mdi-sprinkler-variant
+      - "\U000F1067"  # mdi-valve-closed
+      - "\U000F1068"  # mdi- valve-open
+      - "\U000F0F93"  # mdi- waterpump-off
+      - "\U000F0585"  # mdi- waterpump
+      - "\U000F1482"  # mdi- watering can
+      - "\U000F1508"  # mdi- water-off-outline
+      - "\U000F058D"  # mdi- Water-off
+
+## 2.4" OLED 128x64 SKU 2574 Driver SSD1309/SSD1306
+display:
+  - platform: ssd1306_spi
+    model: SSD1306_128X64
+    cs_pin: GPIO5
+    dc_pin: GPIO19
+    reset_pin: GPIO4
+# An if in c++ must be like this. if ( <logic statement ) { } 
+# eg if ((id(time_remaining).state) == "0s") { }
+    lambda: |-
+      //
+      // Draw the outline of a rectangle with the top left at [5,20], a width of 30 and a height of 42
+      it.rectangle(0, 0, 125, 64);
+      //Draw line above time & date
+      it.line(0, 48, 125, 48);
+      //
+      // DISPLAY TIME in HH:MM format bottom left
+      it.strftime(10, 60, id(ptsans_10), TextAlign::BASELINE_LEFT, "%H:%M:%S", id(hass_time).now());
+      //DISPLAY DATE dd/mm/yy bottom right
+      it.strftime(110, 60, id(ptsans_10), TextAlign::BASELINE_RIGHT, "%a-%d-%b", id(hass_time).now()); 
+      //
+      // DISPLAY ACTIVE VALVE and time remaining
+      if (id($device_name).active_valve().has_value()) {
+      // THE CONTROLLER IS RUNNING, get the active valve into running_valve and print it
+      auto running_valve = (id($device_name).active_valve().value())+1;
+      it.print(6, 5, id(icon_font), "\U000F1068");    // valve-open
+      it.print(105, 5, id(icon_font), "\U000F1060");  // sprinkler-variant
+      it.printf(30, 6, id(roboto_10), "Zone %u active", running_valve);
+      it.printf(17, 20, id(roboto_10), "Time To Run : " "%s" , id(time_remaining).state.c_str());
+      } 
+      // CONTROLLER is NOT running
+      // CHECK if on PAUSE if so display Paused
+      else if ((id(valve_status).state) == "Paused") {
+      it.print(15, 3, (roboto_10), "Controller Paused");
+      it.print(60, 20, id(icon_font), "\U000F0F93");
+      } else {
+      // Display IDLE
+      it.filled_rectangle(13, 4, 110, 20, COLOR_OFF);
+      it.print(30, 3, id(roboto_10), "Controller Idle"); 
+      it.print(56, 17, id(icon_font), "\U000F0F93");
+      }
+      // DISPLAY Start Time
+      //if (id($name).on_h_m().has_value()) {
+      // We have a value print it %s = string & .state.c_str() confirms id() as string
+      it.printf(9, 34, id(ptsans_10), "Start %s : %s", id(retic_on_hour).state.c_str(),id(retic_on_minute).state.c_str());
+
+captive_portal:
+
+dashboard_import:
+  package_import_url: github://esphome/example-configs/esphome-web/esp32.yaml@main
+  import_full_config: true
+
+# Sets up Bluetooth LE (Only on ESP32) to allow the user
+# to provision wifi credentials to the device.
+#esp32_improv:
+#  authorizer: none
+
+# To have a "next url" for improv serial
+web_server:
+
+## Create sensor to hold value of zone run time
+sensor:
+  - platform: template
+    id: zone_run_time
+    name: zone_run_time
+    update_interval: $sensor_update_frequency
+    icon: "mdi:timer-sand"
+    lambda: |-
+      int zone_seconds = int(id($device_name).time_remaining_active_valve().value_or(0));
+      return zone_seconds;
+
+text_sensor:
+# Expose Time Remaining for running zone as a sensor.
+# In display lambda use with printf as above inserting %s and .c_str()
+  - platform: template
+    id: time_remaining
+    name: Zone_Time_Remaining
+    update_interval: $sensor_update_frequency
+    icon: "mdi:timer-sand"
+    lambda: |-
+      int seconds = round(id($device_name).time_remaining_active_valve().value_or(0));
+      int days = seconds / (24 * 3600);
+      seconds = seconds % (24 * 3600);
+      int hours = seconds / 3600;
+      seconds = seconds % 3600;
+      int minutes = seconds /  60;
+      seconds = seconds % 60;
+        return {
+          ((days ? String(days) + "d " : "") + 
+          (hours ? String(hours) + "h " : "") +
+          (minutes ? String(minutes) + "m " : "") +
+          (String(seconds) + "s")).c_str()};
+
+# Expose Valve Status as a sensor.
+  - platform: template
+    id: valve_status
+    name: $device_name Status
+    update_interval: never
+    icon: "mdi:information-variant"
+  - platform: template
+    name: "Current Time"
+    id: current_time
+    update_interval: 10s
+    lambda: |-
+      return  id(hass_time).now().strftime("%H%M");
+
+  - platform: template
+    name: "Current Hour"
+    id: current_hour
+    update_interval: 10s
+    lambda: |-
+      return  id(hass_time).now().strftime("%H");
+        
+  - platform: template
+    name: "Current Min"
+    id: current_min
+    update_interval: 10s
+    lambda: |-
+      return  id(hass_time).now().strftime("%M");  
+
+  - platform: template
+    name: "Current DoW"
+    id: current_dow
+    update_interval: 10s
+    lambda: |-
+      return  id(hass_time).now().strftime("%w"); 
+    
+  - platform: homeassistant
+    id: retic_on_hour
+    entity_id: input_datetime.retic_on_time
+    attribute: hour
+    name: "Start retic hour"
+    
+  - platform: homeassistant
+    id: retic_on_minute
+    entity_id: input_datetime.retic_on_time
+    attribute: minute
+    name: "Start retic minute"
+
+## Switches for valves & days of week (7)
+switch:
+## GPIO switches for valves
+  - platform: gpio
+    name: $zone_0_name valve
+    id: pin_7
+    pin: GPIO32
+     
+  - platform: gpio
+    name: $zone_1_name valve
+    id: pin_8
+    pin: GPIO33
+
+  - platform: gpio
+    name: $zone_2_name valve
+    id: pin_9
+    pin: GPIO25
+
+  - platform: gpio  
+    name: $zone_3_name valve
+    id: pin_10
+    pin: GPIO26
+      
+  - platform: gpio  
+    name: $zone_4_name valve
+    id: pin_11
+    pin: GPIO27
+  
+  - platform: gpio  
+    name: $zone_5_name valve
+    id: pin_12
+    pin: GPIO14
+
+  - platform: gpio  
+    name: $zone_6_name valve
+    id: pin_13
+    pin: GPIO12
+
+  - platform: gpio  
+    name: $zone_7_name valve
+    id: pin_15
+    pin: GPIO13
+
+## Switches for days of the week    
+  - platform: template
+    name: Sunday
+    id: sunday_on_off
+    optimistic: True
+    turn_on_action:
+      - lambda: |-
+          id(on_off_array)[0] = 1;
+          ESP_LOGD ("main", "Sunday True"); 
+    turn_off_action: 
+      - lambda: |-
+          id(on_off_array)[0] = 0;
+          ESP_LOGD ("main", "Sunday False");
+
+  - platform: template
+    name: Monday
+    id: monday_on_off
+    optimistic: True
+    turn_on_action: 
+      - lambda: |-
+          id(on_off_array)[1] = 1;
+          ESP_LOGD ("main", "Monday True");
+    turn_off_action:
+      - lambda: |-
+          id(on_off_array)[1] = 0;
+          ESP_LOGD ("main", "Monday False");
+
+  - platform: template
+    name: Tuesday
+    id: tuesday_on_off
+    optimistic: True
+    turn_on_action: 
+      - lambda: |-
+          id(on_off_array)[2] = 1;
+          ESP_LOGD ("main", "Tuesday True");
+    turn_off_action:
+      - lambda: |-
+          id(on_off_array)[2] = 0;
+          ESP_LOGD ("main", "Tuesday False");
+
+  - platform: template
+    name: Wednesday
+    id: wednesday_on_off
+    optimistic: True
+    turn_on_action: 
+      - lambda: |-
+          id(on_off_array)[3] = 1;
+          ESP_LOGD ("main", "Wednesday True");
+    turn_off_action:
+      - lambda: |-
+          id(on_off_array)[3] = 0;
+          ESP_LOGD ("main", "Wednesday False"); 
+
+  - platform: template
+    name: Thursday
+    id: thursday_on_off
+    optimistic: True
+    turn_on_action: 
+      - lambda: |-
+          id(on_off_array)[4] = 1;
+          ESP_LOGD ("main", "Thursday True");
+    turn_off_action:
+      - lambda: |-
+          id(on_off_array)[4] = 0;
+          ESP_LOGD ("main", "Thursday False");
+
+  - platform: template
+    name: Friday
+    id: friday_on_off
+    optimistic: True
+    turn_on_action: 
+      - lambda: |-
+          id(on_off_array)[5] = 1;
+          ESP_LOGD ("main", "Friday True");
+    turn_off_action:
+      - lambda: |-
+          id(on_off_array)[5] = 0;
+          ESP_LOGD ("main", "Friday False");
+
+  - platform: template
+    name: Saturday
+    id: saturday_on_off
+    optimistic: True
+    turn_on_action: 
+      - lambda: |-
+          id(on_off_array)[6] = 1;
+          ESP_LOGD ("main", "Saturday True");
+    turn_off_action:
+      - lambda: |-
+          id(on_off_array)[6] = 0;
+          ESP_LOGD ("main", "Saturday False");                               
+
+## Section to manage the sprinkler controller actions
+sprinkler:
+  - id: $device_name
+    main_switch: "Start_Stop"
+    auto_advance_switch: $device_name Auto Advance
+    reverse_switch: $device_name Reverse
+    pump_start_pump_delay: 2s
+    pump_stop_valve_delay: 1s
+    valve_overlap: 2s
+
+    valves:  
+      - valve_switch: $zone_1_name
+        enable_switch: Enable $zone_1_name
+        pump_switch_id: pin_7
+        run_duration_number: 
+          name: time_zone_1
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_8  # GPIO 33
+
+      - valve_switch: $zone_2_name
+        enable_switch: Enable $zone_2_name
+        pump_switch_id: pin_7
+        run_duration_number:
+          name: time_Zone_2
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_9   # GPIO 25
+
+      - valve_switch: $zone_3_name
+        enable_switch: Enable $zone_3_name
+        pump_switch_id: pin_7
+        run_duration_number:
+          name: time_zone_3
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_10   # GPIO 26
+
+      - valve_switch: $zone_4_name
+        enable_switch: Enable $zone_4_name
+        pump_switch_id: pin_7
+        run_duration_number:
+          name: time_zone_4
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_11  # GPIO 27
+
+      - valve_switch: $zone_5_name
+        enable_switch: Enable $zone_5_name
+        pump_switch_id: pin_7
+        run_duration_number:
+          name: time_zone_5
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_12  # GPIO 14
+
+      - valve_switch: $zone_6_name
+        enable_switch: Enable $zone_6_name
+        pump_switch_id: pin_7
+        run_duration_number:
+          name: time_zone_6
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_13  #  GPIO 12
+
+      - valve_switch: $zone_7_name
+        enable_switch: Enable $zone_7_name
+        pump_switch_id: pin_7
+        run_duration_number:
+          name: time_zone_7
+          unit_of_measurement: s
+          mode: BOX
+          icon: mdi:timer-outline
+          initial_value: 15
+          min_value: 1
+          max_value: 20
+          step: 1
+          restore_value: true
+          disabled_by_default: false
+        valve_switch_id: pin_15   # GPIO 13
+
+# Set multiplier to apply to all enabled run times
+    multiplier_number:
+      id: time_multiplier
+      name: "Time Multiplier"
+      initial_value: 1
+      min_value: 0.2
+      max_value: 5
+      step: 0.2
+      icon: "mdi:timer-outline"
+      mode: BOX
+      on_value:   # Value given
+        then:
+          - sprinkler.set_multiplier:   # Action set multiplier routine
+              id: $device_name 
+              multiplier:
+                !lambda "return x;"     # Get/pass value of time_multiplier 
+
+# Number of times to repeat sprinkler cycle
+    repeat_number: 
+      id: repeat_number
+      name: Repeat_Cycle
+      initial_value: 0
+      min_value: 0
+      max_value: 5
+      step: 1
+      restore_value: True
+      disabled_by_default: False
+      icon: "mdi:timer-outline"
+      mode: BOX
+      on_value: 
+        then:
+          - sprinkler.set_repeat: !lambda "return x;"   
+
+# Buttons for sundry actions
+button:
+# Button to pause cycle  
+  - platform: template
+    id: sprinkler_pause
+    name: "Pause"
+    icon: "mdi:pause"
+    on_press:
+      then:
+        - text_sensor.template.publish:
+            id: valve_status
+            state: "Paused"
+        - sprinkler.pause: $device_name
+        
+# Button to restart cycle
+  - platform: template
+    id: sprinkler_resume
+    name: "Resume"
+    icon: "mdi:run"
+    on_press:
+      then:
+        - text_sensor.template.publish:
+            id: valve_status
+            state: "Resumed"
+        - sprinkler.resume: $device_name        
+
+# Button to shutdown system
+  - platform: template
+    id: sprinkler_shutdown
+    name: "Shutdown"
+    icon: "mdi:stop"
+    on_press:
+      then:
+        - text_sensor.template.publish:
+            id: valve_status
+            state: "Idle"
+        - sprinkler.shutdown: $device_name   
+
+## Scripts to action start time for retic cycle
+script:
+  - id: on_today  ## Check if retic sceduled to start today
+    then:
+      lambda: |-
+        //Get today and check if array[dow] true or false note array starts at 0
+        id(start_day) = (id(hass_time).now().day_of_week)-1;  //Get day of week as integer 1 - 7
+        ESP_LOGD ("main", "DOW %i ", id(start_day));
+        //id(start_hour) = id(retic_on_hour);
+        ESP_LOGD ("main", "Hr %s ", id(retic_on_hour).state.c_str());
+        ESP_LOGD ("main", "Min %s ", id(retic_on_minute).state.c_str());
+        //
+        if (id(on_off_array)[id(start_day)] == false) {
+        ESP_LOGD ("main", "Today Off");
+        } 
+        else {
+        //Irrigation to start today
+        ESP_LOGD ("main", "Today On"); //Today = On so goto check_hour script
+        id(check_hour).execute();
+        }
+        
+  - id: check_hour  ## Check if current hour = set hour
+    then: 
+      lambda: |-
+        //Compare retic_on_hour with now().hour
+        id(start_hour) = atoi(id(retic_on_hour).state.c_str()); 
+        id(now_hour) = (id(hass_time).now().hour);
+        ESP_LOGD ("main", "Check Hour is %i ", id(start_hour));
+        ESP_LOGD ("main", "Now Hour is %i ", id(now_hour)); 
+        if (id(start_hour) == id(now_hour)) {
+        ESP_LOGD ("main", "Hours = ");
+        id(check_minute).execute();  
+        }
+        else {
+        ESP_LOGD ("main", "Hours not = ");    
+        } 
+   
+  - id: check_minute  ## Check if current minute = set minute
+    then: 
+      lambda: |-
+        //Compare retic_on_minute with now().minute
+        id(start_minute) = atoi(id(retic_on_minute).state.c_str()); 
+        id(now_minute) = (id(hass_time).now().minute);
+        ESP_LOGD ("main", "Check Minute is %i ", id(start_minute));
+        ESP_LOGD ("main", "Now Minute is %i ", id(now_minute)); 
+        if (id(start_minute) != id(now_minute)) {
+        ESP_LOGD ("main", "Minutes not =  ");
+        }
+        else {
+        ESP_LOGD ("main", "Minutes = ");    
+        if (id($device_name).active_valve().has_value()) {
+        ESP_LOGD ("main", "Retic running "); 
+        }else {
+        ESP_LOGD ("main", "Start retic ");
+        id(start_cycle).execute();   
+        }
+        }
+        
+
+  - id: start_cycle   ## Start retic cycle or restart paused
+    then:
+      - sprinkler.resume_or_start_full_cycle: $device_name
+           
+        
