@@ -20,6 +20,10 @@ substitutions:
   zone_7_name: valve_7    # GPIO 13/D15
   
 globals:
+  - id: master_On
+    type: bool
+    restore_value: True
+    initial_value: "true"
   
   - id: on_off_array    #Stores on/off for 7 days of week
     type: int[7]
@@ -91,7 +95,6 @@ wifi:
 
   # Set up a wifi access point
   ap: {}
-
 # In combination with the `ap` this allows the user
 # to provision wifi credentials to the device via WiFi AP.
 
@@ -102,7 +105,7 @@ time:
      # Every 20 seconds check schedule start time
       - seconds: /20
         then:
-          - script.execute: on_today
+          - script.execute: master_On_Off
           
 ##########################################################
 ## 2.4" OLED 128x64 SKU 2574 Driver SSD1309/SSD1306
@@ -200,8 +203,8 @@ dashboard_import:
 # To have a "next url" for improv serial
 web_server:
 
-## Create sensor to hold value of zone run time
 sensor:
+## Create sensor to hold value of zone run time
   - platform: template
     id: zone_run_time
     name: zone_run_time
@@ -210,6 +213,20 @@ sensor:
     lambda: |-
       int zone_seconds = int(id($device_name).time_remaining_active_valve().value_or(0));
       return zone_seconds;
+
+
+# Get on/off value from homeassistant retic_rain_24H helper
+## Value set to on if rainfall < 1.5mm
+## Helper returns on/off for binary 1/0
+  - platform: homeassistant
+    entity_id: binary_sensor.retic_rain_24H
+    id: rain_today
+    name: Rain_today
+#    lambda: |-
+#      ESP_LOGD ("main", "Rainfall Today ", id(rain_today));
+#    - logger.log: "Rainfall Today"
+#        args: id(rain_today).state
+
 
 text_sensor:
 # Expose Time Remaining for running zone as a sensor.
@@ -233,7 +250,8 @@ text_sensor:
           (minutes ? String(minutes) + "m " : "") +
           (String(seconds) + "s")).c_str()};
 
-# Expose Valve Status as a sensor.
+
+# Expose Valve Status as a text sensor.
   - platform: template
     id: valve_status
     name: $device_name Status
@@ -321,6 +339,20 @@ switch:
     name: $zone_7_name valve
     id: pin_15
     pin: GPIO13
+
+## Switch master on/off
+  - platform: template
+    name: Master_on_off
+    id: master_on_off
+    optimistic: True
+    turn_on_action:
+      - lambda: |-
+          id(master_On) = true;
+          ESP_LOGD ("main", "Master On"); 
+    turn_off_action: 
+      - lambda: |-
+          id(master_On) = false;
+          ESP_LOGD ("main", "Master Off");
 
 ## Switches for days of the week    
   - platform: template
@@ -610,6 +642,13 @@ button:
 
 ## Scripts to action start time for retic cycle
 script:
+  - id: master_On_Off  ## Check if master switch is on or off
+    then: 
+      lambda: |-
+        if (id(master_On) == true) {
+        id(on_today).execute();  
+        }
+
   - id: on_today  ## Check if retic sceduled to start today
     then:
       lambda: |-
@@ -661,14 +700,15 @@ script:
         if (id($device_name).active_valve().has_value()) {
         ESP_LOGD ("main", "Retic running "); 
         }else {
+        if (id(rain_today).state == 1);{ 
         ESP_LOGD ("main", "Start retic ");
         id(start_cycle).execute();   
         }
         }
+        }
         
-
-  - id: start_cycle   ## Start retic cycle or restart paused
+## Only if daily rain rate <1.5mm (retic_rain_24H helper = on) then start cycle  
+  - id: start_cycle   
     then:
       - sprinkler.resume_or_start_full_cycle: $device_name
-           
-        
+         

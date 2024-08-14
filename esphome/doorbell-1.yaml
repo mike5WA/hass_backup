@@ -56,6 +56,7 @@ api:
 
 #Allow over the air updates
 ota:
+  platform: esphome
   password: "c60a6199eae2eab7f11591c2d57332c0"
 
 wifi:

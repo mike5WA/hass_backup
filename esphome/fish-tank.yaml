@@ -13,6 +13,7 @@ api:
     key: 5zW+RPh48JV73gJlIXCLNgAzkXReWO1pkPPRgxXAFrE=
     
 ota:
+  platform: esphome
 
 wifi:
   ssid: !secret wifi_ssid
@@ -89,13 +90,14 @@ switch:
     id: green_temp
 
 # Dallas 18B29 temp sensor config
-dallas:
-  - pin: 5
-    update_interval: 60s
+one_wire:
+  - platform: gpio
+    pin: GPIO5
+#    update_interval: 60s
 
 # This gets the sensor reading
 sensor:
-  - platform: dallas
+  - platform: dallas_temp
     address: 0xa23c01f09636d428
     name: "Fish Tank Temp"
     accuracy_decimals: 2

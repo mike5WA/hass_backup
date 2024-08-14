@@ -38,13 +38,14 @@ esp32:
 
 # Enable logging
 logger:
+  level: DEBUG
 
 # Enable Home Assistant API
 api:
 
 # Allow Over-The-Air updates
 ota:
-
+  - platform: esphome
 # Allow provisioning Wi-Fi via serial
 #improv_serial:
 
@@ -63,6 +64,84 @@ wifi:
 
 # In combination with the `ap` this allows the user
 # to provision wifi credentials to the device via WiFi AP.
+########################################################
+## Set global variables for scheduler
+globals:
+## Time variables to start controller  
+  
+  - id: start_hour
+    type: int
+    restore_value: True
+    initial_value: '0'
+
+  - id: start_minute
+    type: int
+    restore_value: True
+    initial_value: '0'
+
+  - id: start_day
+    type: int
+    restore_value: True
+    initial_value: '0'
+## Time variables to store time to start retic
+  - id: now_time
+    type: time_t
+    restore_value: True
+  
+  - id: now_day
+    type: std::string
+    restore_value: True
+    initial_value: '0'  
+
+  - id: now_hour
+    type: int
+    restore_value: True
+    initial_value: '10'
+
+  - id: now_min
+    type: int
+    restore_value: True
+    initial_value: '0' 
+
+## Define variables for scheduled days
+  - id: sch_sunday
+    type: bool
+    restore_value: True
+    initial_value: "false"
+  
+  - id: sch_monday
+    type: bool
+    restore_value: True
+    initial_value: "false"
+
+  - id: sch_tuesday
+    type: bool
+    restore_value: True
+    initial_value: "false"  
+
+  - id: sch_wednesday
+    type: bool
+    restore_value: True
+    initial_value: "false"  
+
+  - id: sch_thursday
+    type: bool
+    restore_value: True
+    initial_value: "false"
+
+  - id: sch_friday
+    type: bool
+    restore_value: True
+    initial_value: "false" 
+
+  - id: sch_saturday
+    type: bool
+    restore_value: True
+    initial_value: "false" 
+
+#########################################################3
+## Define fonts, glyphs for use with display
+
 font:
   - file: "gfonts://Roboto"
     id: roboto_12
@@ -107,11 +186,25 @@ web_server:
 time:
   - platform: homeassistant
     id: esptime
+## Sequence to start controller every x minutes    
+#    on_time:
+#      days_of_week: 1,2,3,4,5,6,7
+#      hours: 17
+#      - minutes: /1   #number: id: my_minute
+#        then:
+#           sprinkler.resume_or_start_full_cycle: $device_name
+
+#if: id(retic_on_time).has_value
+#        - script.execute: now_dhm
+# Every 5 minutes
+#      - seconds: 0
+#        minutes: /5
+       
 
 
 ##########################################################
 ## 2.4" OLED 128x64 SKU 2574 Driver SSD1309/SSD1306
-## SPI config for display using VSPI and SSD1306 driver ##
+## SPI config for display using VSPI and  SSD1306 driver ##
 ###########################################################
 spi:
   mosi_pin: GPIO23    # Pin 37 to Oled DIN
@@ -156,20 +249,34 @@ display:
       } else {
       // Display IDLE
       it.filled_rectangle(13, 4, 110, 20, COLOR_OFF);
-      it.print(25, 5, id(roboto_12), "Controller Idle"); 
-      it.print(60, 22, id(icon_font), "\U000F0F93");
+      it.print(25, 3, id(roboto_12), "Controller Idle"); 
+      it.print(56, 20, id(icon_font), "\U000F0F93");
       }
-      //
-      //it.filled_rectangle(13, 4, 110, 15, COLOR_OFF);
-      //
-      //} 
-      //else {
-      //it.filled_rectangle(13, 4, 110, 20, COLOR_OFF);
-      //it.print(25, 5, id(roboto_12), "Controller Idle");  
-      //}
-      //it.print(25, 5, id(roboto_12), id(valve_status).state); 
+      // Display Schedule Day status
+      //it.print(2, 32, id(ptsans_10), "Sun " , id(sch_sunday))
+      
         
+#####################################################
+## Get variables for hour and minute start time
+number:
+  - platform: template
+    name: "Minute Number"
+    id: my_minute
+    optimistic: true
+    mode: SLIDER
+    min_value: 0
+    max_value: 55
+    step: 5
 
+  - platform: template
+    name: "Hour Number"
+    id: my_hour
+    optimistic: True
+    mode: SLIDER
+    min_value: 0
+    max_value: 23
+    step: 1
+ 
 ###############################################
 # Text sensors with general information.
 ###############################################
@@ -206,9 +313,9 @@ text_sensor:
 # Section to manage the sprinkler controller actions
 sprinkler:
   - id: $device_name
-    main_switch: $sprinkler_control Run
-    auto_advance_switch: $sprinkler_control Auto Advance
-    reverse_switch: $sprinkler_control Reverse
+    main_switch: "Start_Stop"
+    auto_advance_switch: $device_name Auto Advance
+    reverse_switch: $device_name Reverse
     pump_start_pump_delay: 2s
     pump_stop_valve_delay: 1s
     valve_overlap: 2s
@@ -361,8 +468,6 @@ sprinkler:
         then:
           - sprinkler.set_repeat: !lambda "return x;"   
 
-
-
 #################################################
 # Allocate valves/solenoids to ESP GPIO pins
 #################################################
@@ -406,8 +511,101 @@ switch:
     name: $zone_7_name valve
     id: pin_15
     pin: GPIO13
-#####################################################
 
+## Switches for day of week (7)
+  - platform: template
+    name: Sunday
+    id: sunday_on_off
+    optimistic: True
+    turn_on_action: 
+      - globals.set:
+          id: sch_sunday
+          value: "true"
+    turn_off_action: 
+      - globals.set:
+          id: sch_sunday
+          value: "false"
+   
+
+  - platform: template
+    name: Monday
+    id: monday_on_off
+    optimistic: True
+    turn_on_action: 
+      - globals.set:
+          id: sch_monday
+          value: "true"
+    turn_off_action: 
+      - globals.set:
+          id: sch_monday
+          value: "false"
+          
+  - platform: template
+    name: Tuesday
+    id: tuesday_on_off
+    optimistic: True
+    turn_on_action: 
+      - globals.set:
+          id: sch_tuesday
+          value: "true"
+    turn_off_action: 
+      - globals.set:
+          id: sch_tuesday
+          value: "false"
+
+  - platform: template
+    name: Wednesday
+    id: wednesday_on_off
+    optimistic: True
+    turn_on_action: 
+      - globals.set:
+          id: sch_wednesday
+          value: "true"
+    turn_off_action: 
+      - globals.set:
+          id: sch_wednesday
+          value: "false"
+
+  - platform: template
+    name: Thursday
+    id: thursday_on_off
+    optimistic: True
+    turn_on_action: 
+      - globals.set:
+          id: sch_thursday
+          value: "true"
+    turn_off_action: 
+      - globals.set:
+          id: sch_thursday
+          value: "false"
+
+  - platform: template
+    name: Friday
+    id: friday_on_off
+    optimistic: True
+    turn_on_action: 
+      - globals.set:
+          id: sch_friday
+          value: "true"
+    turn_off_action: 
+      - globals.set:
+          id: sch_friday
+          value: "false"
+
+  - platform: template
+    name: Saturday
+    id: saturday_on_off
+    optimistic: True
+    turn_on_action: 
+      - globals.set:
+          id: sch_saturday
+          value: "true"
+    turn_off_action: 
+      - globals.set:
+          id: sch_saturday
+          value: "false"
+
+  
 # Buttons for sundry actions
 button:
 # Button to pause cycle  
@@ -445,3 +643,45 @@ button:
             id: valve_status
             state: "Idle"
         - sprinkler.shutdown: $device_name   
+
+#  - platform: template
+#    id: run_now_dhm
+#    name: "dhm_script"
+#    on_press:
+#      then: 
+#        - globals.set: 
+#            id: now_hour
+#            value: id(esptime).now().hour
+#        - logger.log:
+#            format: "The timestamp is %s"
+#            args: id(now_hour)   
+        
+        
+
+###################################################
+## Scripts to action schedule 
+#script:
+#  - id: now_dhm
+#    then:
+      
+    #      id: now_min 
+    #      value: !lambda "return int(id(esptime).now().minute()"
+       
+        
+
+
+
+
+#  - id: start_retic
+#    mode: restart   # Start new run after stoppin previous
+#    then: 
+#      lambda: |-
+#        // Check if controller running
+#        //now_day = id(esptime).day_of_week();
+#        //ESP_LOGI("main", "now() %w", id(esptime).now());
+#        // Check against scheduled start
+#        // Run if coincides
+
+  
+
+          

@@ -1,0 +1,111 @@
+substitutions:
+  name: irrigation
+  friendly_name: Irrigation
+
+esphome:
+  name: ${name}
+  friendly_name: ${friendly_name}
+  min_version: 2024.6.0
+  name_add_mac_suffix: false
+  project:
+    name: esphome.web
+    version: '1.0'
+
+esp32:
+  board: esp32dev
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+  level: DEBUG
+
+# Enable Home Assistant API
+api:
+
+# Allow Over-The-Air updates
+ota:
+- platform: esphome
+
+# Allow provisioning Wi-Fi via serial
+improv_serial:
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # Set up a wifi access point
+  ap: {}
+
+# In combination with the `ap` this allows the user
+# to provision wifi credentials to the device via WiFi AP.
+font:
+  - file: "gfonts://Roboto"
+    id: roboto_12
+    size: 12
+
+  - file: "gfonts://Roboto"
+    id: roboto_10
+    size: 10
+
+  - file: '/config/fonts/PTSans-Regular.ttf'
+    id: ptsans_10
+    size: 10
+  
+  - file: '/config/fonts/materialdesignicons-webfont.ttf'
+    id: icon_font
+    size: 13
+    glyphs:
+      - "\U000F1060"  # mdi-sprinkler-variant
+      - "\U000F1067"  # mdi-valve-closed
+      - "\U000F1068"  # mdi- valve-open
+      - "\U000F0F93"  # mdi- waterpump-off
+      - "\U000F0585"  # mdi- waterpump
+      - "\U000F1482"  # mdi- watering can
+      - "\U000F1508"  # mdi- water-off-outline
+      - "\U000F058D"  # mdi- Water-off
+
+##########################################################
+## 2.4" OLED 128x64 SKU 2574 Driver SSD1309/SSD1306
+## SPI config for display using VSPI and  SSD1306 driver ##
+###########################################################
+spi:
+  mosi_pin: GPIO23    # Pin 37 to Oled DIN
+  clk_pin: GPIO18     # Pin 30 to oled CLK
+  interface: hardware
+
+display:
+  - platform: ssd1306_spi
+    model: SSD1306_128X64
+    cs_pin: GPIO5
+    dc_pin: GPIO19
+    reset_pin: GPIO4
+
+# An if in c++ must be like this. if ( <logic statement ) { } 
+# eg if ((id(time_remaining).state) == "0s") { }
+    lambda: |-
+      ////////////////////////////////////////////////////
+      // Draw the outline of a rectangle with the top left at [5,20], a width of 30 and a height of 42
+      it.rectangle(0, 0, 125, 64);
+      //Draw line above time & date
+      it.line(0, 46, 125, 46);
+
+
+
+time:
+  - platform: homeassistant
+    id: esptime
+
+captive_portal:
+
+
+dashboard_import:
+  package_import_url: github://esphome/example-configs/esphome-web/esp32.yaml@main
+  import_full_config: true
+
+# Sets up Bluetooth LE (Only on ESP32) to allow the user
+# to provision wifi credentials to the device.
+esp32_improv:
+  authorizer: none
+
+# To have a "next url" for improv serial
+web_server:
