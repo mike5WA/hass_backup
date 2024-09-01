@@ -24,6 +24,11 @@ globals:
     type: bool
     restore_value: True
     initial_value: "true"
+
+  - id: rain_YN
+    type: bool
+    restore_value: True
+    initial_value: '1'
   
   - id: on_off_array    #Stores on/off for 7 days of week
     type: int[7]
@@ -54,6 +59,21 @@ globals:
     type: int
     restore_value: True
     initial_value: '1' 
+
+  - id: zone_seconds
+    type: int
+    restore_value: True
+    initial_value: '0' 
+
+  - id: valve_active
+    type: int
+    restore_value: True
+    initial_value: '0' 
+
+  - id: cycle_seconds
+    type: float
+    restore_value: True
+    initial_value: '0' 
 
   
 esphome:
@@ -206,28 +226,40 @@ web_server:
 sensor:
 ## Create sensor to hold value of zone run time
   - platform: template
+    name: Zone_Run_Time
     id: zone_run_time
-    name: zone_run_time
+    accuracy_decimals: 0
     update_interval: $sensor_update_frequency
-    icon: "mdi:timer-sand"
     lambda: |-
-      int zone_seconds = int(id($device_name).time_remaining_active_valve().value_or(0));
-      return zone_seconds;
+        int zone_seconds = round(id($device_name).time_remaining_active_valve().value_or(0));
+        return zone_seconds;
 
+## Create sensor to display active valve 
+  - platform: template
+    id: valve_number
+    name: Valve_Number
+    accuracy_decimals: 0
+    update_interval: $sensor_update_frequency
+    icon: "mdi:sprinkler-variant"
+    lambda: |-
+      if (id($device_name).active_valve().has_value()) {
+      id(valve_active) = round(id($device_name).active_valve().value()+1);
+      return id(valve_active);
+      }
+      else {
+      id(valve_active) = 0;
+      return id(valve_active);
+      }
 
 # Get on/off value from homeassistant retic_rain_24H helper
 ## Value set to on if rainfall < 1.5mm
 ## Helper returns on/off for binary 1/0
   - platform: homeassistant
-    entity_id: binary_sensor.retic_rain_24H
+    entity_id: sensor.gw2000c_daily_rain_rate_piezo
     id: rain_today
     name: Rain_today
-#    lambda: |-
-#      ESP_LOGD ("main", "Rainfall Today ", id(rain_today));
-#    - logger.log: "Rainfall Today"
-#        args: id(rain_today).state
-
-
+  
+## Text sensors ##################################
 text_sensor:
 # Expose Time Remaining for running zone as a sensor.
 # In display lambda use with printf as above inserting %s and .c_str()
@@ -250,13 +282,14 @@ text_sensor:
           (minutes ? String(minutes) + "m " : "") +
           (String(seconds) + "s")).c_str()};
 
-
-# Expose Valve Status as a text sensor.
+# Valve status as text sensors .
   - platform: template
     id: valve_status
     name: $device_name Status
     update_interval: never
     icon: "mdi:information-variant"
+
+## Current time Hr: Min as text sensor
   - platform: template
     name: "Current Time"
     id: current_time
@@ -264,6 +297,7 @@ text_sensor:
     lambda: |-
       return  id(hass_time).now().strftime("%H%M");
 
+## Current hour as text sensor
   - platform: template
     name: "Current Hour"
     id: current_hour
@@ -271,6 +305,7 @@ text_sensor:
     lambda: |-
       return  id(hass_time).now().strftime("%H");
         
+## Current minute as text sensor
   - platform: template
     name: "Current Min"
     id: current_min
@@ -278,19 +313,22 @@ text_sensor:
     lambda: |-
       return  id(hass_time).now().strftime("%M");  
 
+## Current day of week as text sensor
   - platform: template
     name: "Current DoW"
     id: current_dow
     update_interval: 10s
     lambda: |-
       return  id(hass_time).now().strftime("%w"); 
-    
+
+## Scheduled retic on hour as text sensor    
   - platform: homeassistant
     id: retic_on_hour
     entity_id: input_datetime.retic_on_time
     attribute: hour
     name: "Start retic hour"
-    
+
+## Scheduled retic on minute as text sensor    
   - platform: homeassistant
     id: retic_on_minute
     entity_id: input_datetime.retic_on_time
@@ -640,7 +678,10 @@ button:
             state: "Idle"
         - sprinkler.shutdown: $device_name   
 
+## Check if recent rainfall > 1.5mm is yes dont start cycle
 ## Scripts to action start time for retic cycle
+## Check master switch, if on get current date and time 
+## Compare to scheduled date and time, if coincides start cycle.
 script:
   - id: master_On_Off  ## Check if master switch is on or off
     then: 
@@ -700,7 +741,7 @@ script:
         if (id($device_name).active_valve().has_value()) {
         ESP_LOGD ("main", "Retic running "); 
         }else {
-        if (id(rain_today).state == 1);{ 
+        if (id(rain_today).state < 1.5);  { 
         ESP_LOGD ("main", "Start retic ");
         id(start_cycle).execute();   
         }
@@ -708,7 +749,7 @@ script:
         }
         
 ## Only if daily rain rate <1.5mm (retic_rain_24H helper = on) then start cycle  
-  - id: start_cycle   
+  - id: start_cycle 
     then:
       - sprinkler.resume_or_start_full_cycle: $device_name
          
